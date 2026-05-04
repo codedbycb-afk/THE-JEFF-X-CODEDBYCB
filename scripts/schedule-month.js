@@ -48,6 +48,7 @@ const monthArg = (args.find(a => a.startsWith('--month=')) || '').split('=')[1]
 const COMMIT = args.includes('--commit');
 const POST_TIME_HOUR = 10; // 10 AM EST default
 const SUNDAY_POST_HOUR = 11;
+const PAGES_BASE = 'https://codedbycb-afk.github.io/THE-JEFF-X-CODEDBYCB';
 
 console.log(`\n[Jefferson Scheduler] Month: ${monthArg} · Mode: ${COMMIT ? 'COMMIT (live)' : 'DRY-RUN (preview)'}`);
 
@@ -87,13 +88,15 @@ async function ghlMediaUpload(filePath) {
 }
 
 async function ghlCreatePost({ accountIds, mediaUrl, caption, scheduleISO, type }) {
+  const ext = (mediaUrl.match(/\.([a-z0-9]+)(?:\?|$)/i) || [,'png'])[1].toLowerCase();
+  const mime = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : `image/${ext}`;
   const body = {
     type: type || 'post',
     accountIds,
-    locationId: LOC,
     summary: caption,
-    media: [{ url: mediaUrl, type: 'image' }],
+    media: [{ url: mediaUrl, type: mime }],
     scheduleDate: scheduleISO,
+    userId: ENV.GHL_USER_ID || '1zZlTU0NmSASpHTmFZw1',
     status: 'scheduled'
   };
   const res = await fetch('https://services.leadconnectorhq.com/social-media-posting/' + LOC + '/posts', {
@@ -154,21 +157,18 @@ function isoWithEastern(date, hour) {
     return;
   }
 
-  // Real upload + post
+  // Use GitHub Pages URLs directly (no upload needed)
   for (const p of plan) {
     try {
-      if (!mediaCache[p.flyerPath]) {
-        process.stdout.write(`Uploading ${path.basename(p.flyerPath)}… `);
-        mediaCache[p.flyerPath] = await ghlMediaUpload(p.flyerPath);
-        console.log('done');
-      }
+      const flyerName = path.basename(p.flyerPath);
+      const mediaUrl = `${PAGES_BASE}/assets/${flyerName}`;
+      // TikTok only supports video, so we push images to IG only.
+      // (TikTok scheduling will be added once we have an image→video step.)
       const accountIds = [IG];
-      if (TT) accountIds.push(TT);
-      // re-pick the caption (the dry-run truncated)
       const fullCap = pickCaption(p.day);
       const out = await ghlCreatePost({
         accountIds,
-        mediaUrl: mediaCache[p.flyerPath],
+        mediaUrl,
         caption: fullCap,
         scheduleISO: p.scheduleISO
       });
