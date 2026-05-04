@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Jeff × CODEDBYCB · Social Planner</title>
+<style>
+  :root {
+    --bg: #0b0b0b;
+    --panel: #141414;
+    --panel-2: #1c1c1c;
+    --line: #2a2a2a;
+    --text: #f4f1ea;
+    --muted: #8d8a82;
+    --gold: #d6b06a;
+    --green: #6dd47e;
+    --red: #f47171;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", sans-serif;
+    line-height: 1.45;
+  }
+  header {
+    border-bottom: 1px solid var(--line);
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(180deg, #111 0%, #0b0b0b 100%);
+  }
+  header h1 {
+    margin: 0;
+    font-size: 18px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  header h1 span.gold { color: var(--gold); }
+  header .meta { color: var(--muted); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
+  nav.tabs {
+    display: flex;
+    gap: 4px;
+    padding: 10px 28px 0;
+    border-bottom: 1px solid var(--line);
+    background: #0e0e0e;
+  }
+  nav.tabs button {
+    background: transparent;
+    border: 0;
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 12px 18px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  nav.tabs button.active { color: var(--gold); border-bottom-color: var(--gold); }
+  nav.tabs button:hover { color: var(--text); }
+  main { padding: 28px; max-width: 1200px; margin: 0 auto; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 18px;
+  }
+  .row { display: flex; gap: 18px; flex-wrap: wrap; }
+  .row > * { flex: 1; min-width: 240px; }
+  h2 { margin: 0 0 14px; font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); font-weight: 700; }
+  h3 { margin: 0 0 10px; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); font-weight: 600; }
+  .muted { color: var(--muted); font-size: 12px; }
+  .stat { font-size: 28px; font-weight: 700; color: var(--text); }
+  .stat-label { color: var(--muted); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; }
+
+  /* Calendar */
+  .cal-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .cal-head select { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); padding: 6px 10px; border-radius: 4px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .cal-dow { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.16em; padding: 8px 6px; text-align: center; }
+  .cal-cell {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px;
+    min-height: 88px;
+    cursor: pointer;
+    transition: transform 0.08s, border-color 0.08s;
+    position: relative;
+  }
+  .cal-cell:hover { border-color: var(--gold); transform: translateY(-1px); }
+  .cal-cell.empty { background: transparent; border: 1px dashed #1a1a1a; cursor: default; }
+  .cal-cell.empty:hover { border-color: #1a1a1a; transform: none; }
+  .cal-cell .dnum { font-size: 14px; font-weight: 700; }
+  .cal-cell .dlabel { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+  .cal-cell.approved::after { content: "✓"; position: absolute; top: 6px; right: 8px; color: var(--green); font-weight: 700; }
+  .cal-cell.manual::after { content: "M"; position: absolute; top: 6px; right: 8px; color: var(--gold); font-weight: 700; font-size: 11px; }
+
+  /* Approve bar */
+  .approve-bar {
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+  }
+  .approve-bar .status { font-size: 12px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+  .approve-bar .status.ok { color: var(--green); }
+  button.btn {
+    background: var(--gold);
+    color: #1a1206;
+    border: 0;
+    padding: 11px 20px;
+    border-radius: 6px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  button.btn:hover { filter: brightness(1.08); }
+  button.btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+  button.btn.danger { background: var(--red); color: #1a0606; }
+
+  /* Modal */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    max-width: 880px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-head { padding: 16px 22px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+  .modal-body { padding: 22px; }
+  .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  @media (max-width: 720px) { .modal-grid { grid-template-columns: 1fr; } }
+  .flyer-preview { width: 100%; border-radius: 6px; border: 1px solid var(--line); }
+  .caption-box { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 14px; white-space: pre-wrap; font-size: 13px; color: var(--text); margin-bottom: 12px; }
+  .caption-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .caption-meta .badge { background: var(--panel-2); border: 1px solid var(--line); padding: 3px 8px; border-radius: 4px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; }
+  table th, table td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); font-size: 13px; }
+  table th { color: var(--muted); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; }
+
+  /* Inputs */
+  input, textarea, select {
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--line);
+    padding: 9px 11px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  textarea { width: 100%; min-height: 56px; resize: vertical; }
+  .form-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .form-row > * { flex: 1; min-width: 100px; }
+
+  .pill { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .pill.green { background: rgba(109, 212, 126, 0.15); color: var(--green); }
+  .pill.gold { background: rgba(214, 176, 106, 0.15); color: var(--gold); }
+  .pill.muted { background: var(--panel-2); color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>The Jeff <span class="gold">×</span> CODEDBYCB</h1>
+  <div class="meta">Social Planner</div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="schedule">Schedule</button>
+  <button class="tab-btn" data-tab="payments">Payments</button>
+  <button class="tab-btn" data-tab="tasks">Task Log</button>
+</nav>
+
+<main>
+  <!-- SCHEDULE -->
+  <section id="tab-schedule" class="tab-pane">
+    <div class="approve-bar">
+      <div>
+        <div class="stat" id="stat-month">—</div>
+        <div class="stat-label" id="stat-status">Loading…</div>
+      </div>
+      <div style="flex: 1"></div>
+      <span class="status" id="approve-status">Not approved yet</span>
+      <button class="btn ghost" id="btn-shuffle">Shuffle Captions</button>
+      <button class="btn" id="btn-approve">Approve This Month's Schedule</button>
+    </div>
+
+    <div class="card">
+      <div class="cal-head">
+        <h2 style="margin: 0">Monthly Schedule</h2>
+        <div style="flex:1"></div>
+        <select id="month-select"></select>
+      </div>
+      <div class="cal-grid">
+        <div class="cal-dow">Sun</div><div class="cal-dow">Mon</div><div class="cal-dow">Tue</div><div class="cal-dow">Wed</div><div class="cal-dow">Thu</div><div class="cal-dow">Fri</div><div class="cal-dow">Sat</div>
+      </div>
+      <div class="cal-grid" id="cal-body"></div>
+      <div style="margin-top: 14px; font-size: 11px; color: var(--muted); display: flex; gap: 16px;">
+        <span><span style="color:var(--green); font-weight:700">✓</span> Approved</span>
+        <span><span style="color:var(--gold); font-weight:700">M</span> Manually scheduled by CB</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAYMENTS -->
+  <section id="tab-payments" class="tab-pane" hidden>
+    <div class="row">
+      <div class="card">
+        <div class="stat-label">Next Payment</div>
+        <div class="stat" id="pay-next-date">—</div>
+        <div class="muted" id="pay-next-amount">—</div>
+      </div>
+      <div class="card">
+        <div class="stat-label">Monthly Retainer</div>
+        <div class="stat" id="pay-retainer">—</div>
+        <div class="muted" id="pay-method">—</div>
+      </div>
+      <div class="card">
+        <div class="stat-label">Days Until Due</div>
+        <div class="stat" id="pay-days">—</div>
+        <div class="muted">until next invoice</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Payment History</h2>
+      <table>
+        <thead><tr><th>Date</th><th>Invoice</th><th>Amount</th><th>Status</th></tr></thead>
+        <tbody id="pay-history"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- TASK LOG -->
+  <section id="tab-tasks" class="tab-pane" hidden>
+    <div class="card">
+      <h2>Add Task</h2>
+      <div class="form-row">
+        <input type="date" id="task-date">
+        <input type="text" id="task-title" placeholder="What did you finish?" style="flex: 3">
+        <select id="task-category">
+          <option>Build</option><option>Content</option><option>Design</option>
+          <option>Revision</option><option>Automation</option><option>Strategy</option><option>Other</option>
+        </select>
+        <input type="number" id="task-hours" placeholder="hrs" step="0.25" min="0">
+        <button class="btn" id="btn-add-task">Add</button>
+      </div>
+      <div class="muted">Tasks are saved to localStorage. Export to update tasks.json in the repo.</div>
+    </div>
+    <div class="card">
+      <div style="display:flex; align-items:center; margin-bottom: 14px;">
+        <h2 style="margin:0">Work Done</h2>
+        <div style="flex:1"></div>
+        <span class="pill gold" id="task-total-hours">0 hrs</span>
+        <button class="btn ghost" id="btn-export-tasks" style="margin-left: 10px;">Export JSON</button>
+      </div>
+      <table>
+        <thead><tr><th>Date</th><th>Task</th><th>Category</th><th>Hours</th></tr></thead>
+        <tbody id="tasks-body"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<!-- DAY MODAL -->
+<div class="modal-bg" id="day-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2 style="margin:0" id="modal-title">—</h2>
+        <div class="muted" id="modal-sub">—</div>
+      </div>
+      <button class="btn ghost" id="modal-close">Close</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-grid">
+        <div>
+          <img id="modal-flyer" class="flyer-preview" alt="Flyer preview">
+        </div>
+        <div>
+          <div class="caption-meta">
+            <span class="badge" id="modal-platforms">IG · TikTok</span>
+            <span class="badge" id="modal-time">10:00 AM</span>
+            <span class="pill" id="modal-status">Draft</span>
+          </div>
+          <h3>Caption</h3>
+          <textarea id="modal-caption" rows="10"></textarea>
+          <div style="display:flex; gap:8px; margin-top:10px; flex-wrap: wrap;">
+            <button class="btn ghost" id="modal-reroll">Reroll Caption</button>
+            <button class="btn ghost" id="modal-copy">Copy</button>
+            <button class="btn" id="modal-save">Save</button>
+          </div>
+          <div style="margin-top: 14px;">
+            <h3>Notes</h3>
+            <textarea id="modal-notes" rows="3" placeholder="Optional notes for this post…"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORE_KEY = 'jeff-x-codedbycb-v1';
+const DAY_LABELS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+let scheduleConfig = null;
+let captionLib = {}; // dayName -> { captions: [...] }
+let payments = null;
+let tasks = [];
+let state = {
+  month: null,
+  picks: {},   // 'YYYY-MM-DD' -> { captionIndex, edited?, notes? }
+  approved: {} // 'YYYY-MM' -> true
+};
+
+// ---- helpers ----
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) state = Object.assign(state, JSON.parse(raw));
+  } catch {}
+}
+function saveState() {
+  localStorage.setItem(STORE_KEY, JSON.stringify(state));
+}
+function ymd(d) { return d.toISOString().slice(0, 10); }
+function ym(d) { return d.toISOString().slice(0, 7); }
+function daysInMonth(y, m) { return new Date(y, m+1, 0).getDate(); }
+function pickCaption(dayName, dateStr) {
+  const day = (dayName||'').toLowerCase();
+  const lib = captionLib[day];
+  if (!lib) return '';
+  // Deterministic per date so calendar stays stable until shuffled
+  const seed = state.picks[dateStr]?.captionIndex;
+  if (typeof seed === 'number' && seed < lib.captions.length) return lib.captions[seed];
+  const idx = Math.floor(Math.random() * lib.captions.length);
+  state.picks[dateStr] = { captionIndex: idx };
+  saveState();
+  return lib.captions[idx];
+}
+function rerollCaption(dateStr, dayName) {
+  const day = (dayName||'').toLowerCase();
+  const lib = captionLib[day];
+  if (!lib) return '';
+  const cur = state.picks[dateStr]?.captionIndex ?? -1;
+  let next = cur;
+  if (lib.captions.length > 1) {
+    while (next === cur) next = Math.floor(Math.random() * lib.captions.length);
+  } else next = 0;
+  state.picks[dateStr] = { captionIndex: next };
+  saveState();
+  return lib.captions[next];
+}
+
+// ---- data load ----
+async function loadAll() {
+  const [sched, ...caps] = await Promise.all([
+    fetch('data/schedule.json').then(r => r.json()),
+    fetch('captions/sunday.json').then(r => r.json()),
+    fetch('captions/monday.json').then(r => r.json()),
+    fetch('captions/tuesday.json').then(r => r.json()),
+    fetch('captions/wednesday.json').then(r => r.json()),
+    fetch('captions/thursday.json').then(r => r.json()),
+    fetch('captions/friday.json').then(r => r.json()),
+    fetch('captions/saturday.json').then(r => r.json()),
+  ]);
+  scheduleConfig = sched;
+  ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'].forEach((d,i) => {
+    captionLib[d] = caps[i];
+  });
+  payments = await fetch('data/payments.json').then(r => r.json());
+  const taskFile = await fetch('data/tasks.json').then(r => r.json());
+  // Merge static tasks with anything stored locally
+  const local = JSON.parse(localStorage.getItem('jeff-tasks-local') || '[]');
+  tasks = (taskFile.tasks || []).concat(local);
+}
+
+// ---- rendering ----
+function renderMonthSelector() {
+  const sel = document.getElementById('month-select');
+  const now = new Date();
+  const opts = [];
+  for (let i = -2; i <= 6; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    opts.push(`<option value="${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}">${d.toLocaleString('en-US',{month:'long',year:'numeric'})}</option>`);
+  }
+  sel.innerHTML = opts.join('');
+  sel.value = state.month;
+  sel.addEventListener('change', () => { state.month = sel.value; saveState(); renderCalendar(); });
+}
+
+function renderCalendar() {
+  const [y, m] = state.month.split('-').map(Number);
+  const total = daysInMonth(y, m-1);
+  const firstDow = new Date(y, m-1, 1).getDay();
+  document.getElementById('stat-month').textContent = new Date(y, m-1, 1).toLocaleString('en-US',{month:'long',year:'numeric'});
+  const monthApproved = state.approved[state.month];
+  document.getElementById('stat-status').textContent = monthApproved ? 'Approved' : 'Awaiting Approval';
+  document.getElementById('approve-status').textContent = monthApproved ? '✓ Approved' : 'Not approved yet';
+  document.getElementById('approve-status').className = 'status ' + (monthApproved ? 'ok' : '');
+
+  const body = document.getElementById('cal-body');
+  let html = '';
+  for (let i = 0; i < firstDow; i++) html += '<div class="cal-cell empty"></div>';
+  for (let d = 1; d <= total; d++) {
+    const date = new Date(y, m-1, d);
+    const dow = date.getDay();
+    const cfg = scheduleConfig.weekday_map[String(dow)];
+    const dateStr = ymd(date);
+    const cls = ['cal-cell'];
+    if (monthApproved) cls.push('approved');
+    if (cfg.manual_override) cls.push('manual');
+    html += `<div class="${cls.join(' ')}" data-date="${dateStr}" data-dow="${dow}">
+      <div class="dnum">${d}</div>
+      <div class="dlabel">${cfg.day}</div>
+      <div class="muted" style="font-size:10px; margin-top:4px;">${cfg.post_time}</div>
+    </div>`;
+  }
+  body.innerHTML = html;
+  body.querySelectorAll('.cal-cell:not(.empty)').forEach(el => {
+    el.addEventListener('click', () => openDayModal(el.dataset.date, parseInt(el.dataset.dow,10)));
+  });
+}
+
+function openDayModal(dateStr, dow) {
+  const cfg = scheduleConfig.weekday_map[String(dow)];
+  document.getElementById('modal-title').textContent = `${cfg.day} · ${dateStr}`;
+  document.getElementById('modal-sub').textContent = cfg.manual_override
+    ? 'Manually scheduled by CB — not part of auto-run'
+    : `Auto-scheduled · ${cfg.platforms.join(' + ')} at ${cfg.post_time}`;
+  document.getElementById('modal-flyer').src = cfg.flyer;
+  document.getElementById('modal-platforms').textContent = cfg.platforms.map(p => p.toUpperCase()).join(' · ');
+  document.getElementById('modal-time').textContent = cfg.post_time;
+  const status = document.getElementById('modal-status');
+  if (cfg.manual_override) { status.textContent = 'Manual'; status.className = 'pill gold'; }
+  else if (state.approved[state.month]) { status.textContent = 'Approved'; status.className = 'pill green'; }
+  else { status.textContent = 'Draft'; status.className = 'pill muted'; }
+
+  const cap = state.picks[dateStr]?.edited || pickCaption(cfg.day, dateStr);
+  document.getElementById('modal-caption').value = cap;
+  document.getElementById('modal-notes').value = state.picks[dateStr]?.notes || '';
+
+  document.getElementById('modal-reroll').onclick = () => {
+    const next = rerollCaption(dateStr, cfg.day);
+    document.getElementById('modal-caption').value = next;
+  };
+  document.getElementById('modal-copy').onclick = () => {
+    navigator.clipboard.writeText(document.getElementById('modal-caption').value);
+  };
+  document.getElementById('modal-save').onclick = () => {
+    const edited = document.getElementById('modal-caption').value;
+    const notes = document.getElementById('modal-notes').value;
+    state.picks[dateStr] = Object.assign({}, state.picks[dateStr] || {}, { edited, notes });
+    saveState();
+    closeModal();
+  };
+
+  document.getElementById('day-modal').classList.add('show');
+}
+function closeModal() { document.getElementById('day-modal').classList.remove('show'); }
+
+function renderPayments() {
+  document.getElementById('pay-next-date').textContent = payments.next_payment_date;
+  document.getElementById('pay-next-amount').textContent = `$${payments.next_payment_amount.toLocaleString()} · ${payments.payment_method}`;
+  document.getElementById('pay-retainer').textContent = `$${payments.monthly_retainer.toLocaleString()}`;
+  document.getElementById('pay-method').textContent = `${payments.billing_cycle} retainer`;
+  const today = new Date();
+  const next = new Date(payments.next_payment_date);
+  const days = Math.max(0, Math.ceil((next - today) / 86400000));
+  document.getElementById('pay-days').textContent = days;
+  const tbody = document.getElementById('pay-history');
+  tbody.innerHTML = payments.history.map(h => `
+    <tr><td>${h.date}</td><td>${h.invoice}</td><td>$${h.amount.toLocaleString()}</td>
+    <td><span class="pill ${h.status==='paid'?'green':'gold'}">${h.status}</span></td></tr>
+  `).join('');
+}
+
+function renderTasks() {
+  tasks.sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  const tbody = document.getElementById('tasks-body');
+  tbody.innerHTML = tasks.map(t => `
+    <tr><td>${t.date}</td><td>${t.title}</td><td><span class="pill muted">${t.category}</span></td><td>${t.hours||0}</td></tr>
+  `).join('');
+  const total = tasks.reduce((s, t) => s + (Number(t.hours)||0), 0);
+  document.getElementById('task-total-hours').textContent = `${total} hrs`;
+}
+
+function addTask() {
+  const t = {
+    date: document.getElementById('task-date').value || new Date().toISOString().slice(0,10),
+    title: document.getElementById('task-title').value.trim(),
+    category: document.getElementById('task-category').value,
+    hours: parseFloat(document.getElementById('task-hours').value) || 0
+  };
+  if (!t.title) return;
+  tasks.push(t);
+  const local = JSON.parse(localStorage.getItem('jeff-tasks-local') || '[]');
+  local.push(t);
+  localStorage.setItem('jeff-tasks-local', JSON.stringify(local));
+  document.getElementById('task-title').value = '';
+  document.getElementById('task-hours').value = '';
+  renderTasks();
+}
+
+function exportTasks() {
+  const blob = new Blob([JSON.stringify({ client: 'The Jefferson Bar & Grill', tasks }, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'tasks.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ---- tab switching ----
+function setTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.tab-pane').forEach(p => p.hidden = (p.id !== 'tab-' + name));
+}
+
+// ---- approve flow ----
+function approveMonth() {
+  if (!confirm(`Approve all posts for ${state.month}?\n\nThis marks the month as approved in the UI. The scheduler script will then push them to GHL on its next run.`)) return;
+  state.approved[state.month] = true;
+  saveState();
+  renderCalendar();
+  alert('Month approved. Scheduler will push to GHL on the next run.');
+}
+
+function shuffleAll() {
+  const [y, m] = state.month.split('-').map(Number);
+  const total = daysInMonth(y, m-1);
+  for (let d = 1; d <= total; d++) {
+    const date = new Date(y, m-1, d);
+    const dateStr = ymd(date);
+    const cfg = scheduleConfig.weekday_map[String(date.getDay())];
+    rerollCaption(dateStr, cfg.day);
+  }
+  alert('Captions shuffled for the month.');
+}
+
+// ---- boot ----
+(async function init(){
+  loadState();
+  if (!state.month) state.month = new Date().toISOString().slice(0,7);
+  await loadAll();
+  renderMonthSelector();
+  renderCalendar();
+  renderPayments();
+  renderTasks();
+  document.getElementById('task-date').value = new Date().toISOString().slice(0,10);
+
+  document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('day-modal').addEventListener('click', e => { if (e.target.id === 'day-modal') closeModal(); });
+  document.getElementById('btn-approve').addEventListener('click', approveMonth);
+  document.getElementById('btn-shuffle').addEventListener('click', shuffleAll);
+  document.getElementById('btn-add-task').addEventListener('click', addTask);
+  document.getElementById('btn-export-tasks').addEventListener('click', exportTasks);
+})();
+</script>
+</body>
+</html>

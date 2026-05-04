@@ -1,0 +1,14 @@
+{
+  "name": "the-jeff-x-codedbycb",
+  "version": "1.0.0",
+  "description": "Monthly social planner + UI for The Jefferson Bar & Grill, built by CODEDBYCB.",
+  "private": true,
+  "scripts": {
+    "schedule:dry": "node scripts/schedule-month.js",
+    "schedule:commit": "node scripts/schedule-month.js --commit",
+    "serve": "python3 -m http.server 4173"
+  },
+  "dependencies": {
+    "form-data": "^4.0.0"
+  }
+}

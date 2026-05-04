@@ -1,0 +1,13 @@
+{
+  "client": "The Jefferson Bar & Grill",
+  "contact": "3670 W 130th St · Cleveland, OH",
+  "monthly_retainer": 500,
+  "billing_cycle": "monthly",
+  "next_payment_date": "2026-06-01",
+  "next_payment_amount": 500,
+  "payment_method": "Stripe (CODEDBYCB invoice)",
+  "history": [
+    { "date": "2026-05-01", "amount": 500, "status": "paid", "invoice": "INV-2026-05" },
+    { "date": "2026-04-01", "amount": 500, "status": "paid", "invoice": "INV-2026-04" }
+  ]
+}

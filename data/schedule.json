@@ -1,0 +1,14 @@
+{
+  "month": "2026-05",
+  "approved": false,
+  "approved_at": null,
+  "weekday_map": {
+    "0": { "day": "Sunday",    "flyer": "assets/jefferson-sunday-flyer.png",    "captions_file": "captions/sunday.json",    "post_time": "11:00", "platforms": ["instagram", "tiktok"] },
+    "1": { "day": "Monday",    "flyer": "assets/jefferson-monday-flyer.png",    "captions_file": "captions/monday.json",    "post_time": "10:00", "platforms": ["instagram", "tiktok"] },
+    "2": { "day": "Tuesday",   "flyer": "assets/jefferson-tuesday-flyer.png",   "captions_file": "captions/tuesday.json",   "post_time": "10:00", "platforms": ["instagram", "tiktok"] },
+    "3": { "day": "Wednesday", "flyer": "assets/jefferson-wednesday-flyer.png", "captions_file": "captions/wednesday.json", "post_time": "10:00", "platforms": ["instagram", "tiktok"] },
+    "4": { "day": "Thursday",  "flyer": "assets/jefferson-thursday-flyer.png",  "captions_file": "captions/thursday.json",  "post_time": "10:00", "platforms": ["instagram", "tiktok"] },
+    "5": { "day": "Friday",    "flyer": "assets/jefferson-friday-flyer.png",    "captions_file": "captions/friday.json",    "post_time": "10:00", "platforms": ["instagram", "tiktok"] },
+    "6": { "day": "Saturday",  "flyer": "assets/jefferson-saturday-flyer.png",  "captions_file": "captions/saturday.json",  "post_time": "10:00", "platforms": ["instagram", "tiktok"], "manual_override": true, "note": "Saturday is scheduled manually by CB" }
+  }
+}

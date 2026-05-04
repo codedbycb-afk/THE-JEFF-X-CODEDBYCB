@@ -1,0 +1,10 @@
+{
+  "client": "The Jefferson Bar & Grill",
+  "tasks": [
+    { "date": "2026-05-04", "title": "Built Jefferson Social Planner UI", "category": "Build", "hours": 2 },
+    { "date": "2026-05-04", "title": "Wrote 350-caption library (50 per day × 7 days)", "category": "Content", "hours": 1.5 },
+    { "date": "2026-05-02", "title": "Generated full set of 7 weekly flyers via Higgsfield Nano Banana Pro", "category": "Design", "hours": 1 },
+    { "date": "2026-05-02", "title": "Removed DJ tagging from all flyer prompts (Friday + Saturday)", "category": "Revision", "hours": 0.5 },
+    { "date": "2026-05-01", "title": "Connected Higgsfield MCP server to flyer pipeline", "category": "Automation", "hours": 1 }
+  ]
+}
